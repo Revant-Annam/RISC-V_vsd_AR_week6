@@ -6,8 +6,8 @@ This repository documents week 6 of the journey through the **RISC-V SoC Tapeout
 
 * [Day 1 Labs: 'picorv32a' Synthesis & Flop Ratio](#day-1-labs-picorv32a-synthesis--flop-ratio)
 * [Day 2 Labs: Floorplan & Placement](#day-2-labs-floorplan--placement)
-* [Day 3 Labs: Custom Inverter Design & DRC Fix](#day-3-labs-custom-inver...
-* [Day 4 Labs: Standard Cell Integration & Timing ECO](#day-4-labs-standar...
+* [Day 3 Labs: Custom Inverter Design & DRC Fix](#day-3-labs-custom-inverter-design--drc-fix)
+* [Day 4 Labs: Standard Cell Integration & Timing ECO](#day-4-labs-standard-cell-integration--timing-eco)
 * [Day 5 Labs: PDN, Routing & Post-Route STA](#day-5-labs-pdn-routing--post-route-sta)
 * [Notes on Digital and Analog Block Interaction](#notes-on-digital-and-analog-block-interaction)
 * [Observations on DRC, LVS, and STA Inter-dependencies](#observations-on-drc-lvs-and-sta-inter-dependencies)
@@ -328,6 +328,9 @@ gen_pdn
 ```
 
 **Screenshots of PDN Run:**
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c4e5609e-3d85-49a1-a7cf-9819bb9be4eb" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b5dff2ff-ab0e-4a7e-b555-eb799cccebee" />
 
 **Commands to Load PDN in Magic (new terminal):**
 
@@ -341,6 +344,10 @@ magic -T .../sky130A.tech lef read ../../tmp/merged.lef def read 14-pdn.def &
 
 **Screenshots of PDN Layout:**
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/42bfbe4f-add6-49d3-b4aa-1429eb06d2c9" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2988ad2e-9fb8-4f0a-b3d2-aa6e10efcd64" />
+
 ### 2\. Perform Detailed Routing (TritonRoute)
 
 **Commands (in OpenLANE interactive shell):**
@@ -349,14 +356,21 @@ magic -T .../sky130A.tech lef read ../../tmp/merged.lef def read 14-pdn.def &
 # Check value of 'CURRENT_DEF'
 echo $::env(CURRENT_DEF)
 
-# Check value of 'ROUTING_STRATEGY'
-echo $::env(ROUTING_STRATEGY)
-
 # Command for detailed route using TritonRoute
 run_routing
 ```
 
 **Screenshots of Routing Run:**
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/7cfb9f86-426c-4bc6-8b2f-b331c24cb332" />
+
+Screenshot of fast route guide present in openlane/designs/picorv32a/runs/29-10_19-51/tmp/routing directory
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/bbc4bcbc-7aa1-4263-9f35-21b6a29e3a33" />
+
+Screenshot of the spef file
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e80a6ecf-14a2-4c55-95ed-d7210016dd4c" />
 
 **Commands to Load Routed DEF in Magic (new terminal):**
 
@@ -370,21 +384,13 @@ magic -T .../sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.def &
 
 **Screenshots of Routed Layout:**
 
-### 3\. Post-Route Parasitic Extraction (SPEF)
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/839197ec-eb23-485f-b5f0-17713d7e0901" />
 
-Used an external SPEF extractor tool.
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/beed3387-647c-4a2d-8314-fd095bd66676" />
 
-**Commands (in bash terminal):**
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3195ae58-b0b5-44d5-bd0e-2ba135ea1493" />
 
-```bash
-# Change directory
-cd Desktop/work/tools/SPEF_EXTRACTOR
-
-# Command extract spef
-python3 main.py /home/vsduser/.../merged.lef /home/vsduser/.../picorv32a.def
-```
-
-### 4\. Post-Route OpenSTA Timing Analysis
+### 3\. Post-Route OpenSTA Timing Analysis
 
 Performed a final timing analysis using the extracted SPEF file to get the most accurate results.
 
@@ -395,13 +401,19 @@ Performed a final timing analysis using the extracted SPEF file to get the most 
 openroad
 
 # Reading lef file
-read_lef /openLANE_flow/designs/picorv32a/runs/26-03_08-45/tmp/merged.lef
+read_lef /openLANE_flow/designs/picorv32a/runs/29-10_19-51/tmp/merged.lef
 
 # Reading def file
-read_def /openLANE_flow/designs/picorv32a/runs/26-03_08-45/results/routing/picorv32a.def
+read_def /openLANE_flow/designs/picorv32a/runs/29-10_19-51/results/routing/picorv32a.def
 
-# Read netlist post CTS (preroute)
-read_verilog /openLANE_flow/designs/picorv32a/runs/26-03_08-45/results/synthesis/picorv32a.synthesis_preroute.v
+# Creating an OpenROAD database to work with
+write_db pico_route.db
+
+# Loading the created database in OpenROAD
+read_db pico_route.db
+
+# Read netlist post CTS
+read_verilog /openLANE_flow/designs/picorv32a/runs/29-10_19-51/results/synthesis/picorv32a.synthesis_preroute.v
 
 # Read library for design
 read_liberty $::env(LIB_SYNTH_COMPLETE)
@@ -410,13 +422,13 @@ read_liberty $::env(LIB_SYNTH_COMPLETE)
 link_design picorv32a
 
 # Read in the custom sdc we created
-read_sdc /openLANE_flow/designs/picorv32a/src/my_base.sdc
+read_sdc /openLANE_flow/designs/picorv32a/src/base.sdc
 
 # Setting all cloks as propagated clocks
 set_propagated_clock [all_clocks]
 
 # Read SPEF
-read_spef /openLANE_flow/designs/picorv32a/runs/26-03_08-45/results/routing/picorv32a.spef
+read_spef /openLANE_flow/designs/picorv32a/runs/29-10_19-51/results/routing/picorv32a.spef
 
 # Generating custom timing report
 report_checks -path_delay min_max -fields {slew trans net cap input_pins} -format full_clock_expanded -digits 4
@@ -425,7 +437,17 @@ report_checks -path_delay min_max -fields {slew trans net cap input_pins} -forma
 exit
 ```
 
-**Screenshots of Post-Route STA:**
+**Screenshots of Post-Route Analysis:**
+
+No DRC violations:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/76f39d92-0d51-46e5-a09e-c8be5f98e49e" />
+
+STA for signoff:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d1356dba-aeb7-43e3-a62d-ab59d9fef666" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4a7284b3-7ceb-48b2-8d32-65959aa12216" />
 
 ### Key Learnings (Day 5)
 
