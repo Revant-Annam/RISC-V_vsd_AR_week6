@@ -1,4 +1,4 @@
-# Sky130 Day 2 - Floorplan
+# Sky130 Day 2 - Good floorplan vs bad floorplan and introduction to library cells
 
 ## Chip Floor Planning Strategy
 
@@ -131,59 +131,210 @@ With this complete, the floor plan is prepared for the Placement and Routing pha
 
 <img width="1100" height="687" alt="image" src="https://github.com/user-attachments/assets/cbe6625e-2ed1-47f3-bf60-4d4950a1b0d1" />
 
------
+## Library binding and Placement
 
-## Floorplanning Configuration in OpenLANE
+### Bind Netlist with Physical Cells
 
-Before running the floorplan, OpenLANE relies on several configuration variables. By default, these are set to a **`CORE_UTILIZATION`** of 50% and an **`ASPECT_RATIO`** of 1 (creating a square core).
+Consider the netlist of gates where each gate's shape represents its function. For instance, a NOT gate appears triangular, but in reality, it's a box with defined width and height. 
+Similarly, standard cell are square or rectangular boxes. We assign physical dimensions to all gates and flip-flops, giving each netlist component a specific shape and size, as real-world components don't 
+exist as symbolic shapes—they're all rectangular blocks with proper dimensions.
 
-These default values are not fixed and can be overridden in the configuration file to meet specific design requirements. Other critical settings defined by default include:
+<img width="1027" height="671" alt="image" src="https://github.com/user-attachments/assets/bfda9a60-8a1d-4596-8dc6-bb3df68b343f" />
 
-  * **`FP_PDN_...`** variables: These automatically set up the power distribution network (PDN).
-  * **`FP_IO_MODE`**: This controls how I/O pins are placed. The default (mode 1, 0) signifies that pins will be placed at equal distances from each other but in a random order.
+After removing wires, all gates, flip-flops, and blocks reside in a collection called the Library.
 
-OpenLANE uses a priority system for loading these settings. The PDK variant's configuration file (`sky130A_sky130_fd_sc_hd_config.tcl`) has the **highest priority**,
-followed by the design-specific `config.tcl`. The flow's system default (`floorplanning.tcl`) has the **lowest priority**.
+A library contains all available cells, similar to books in a collection. It includes timing data like gate delays. Libraries can be divided into sub-categories:
+one containing physical shape and size information, another with delay information. Libraries offer multiple variants of each cell—larger cells have lower resistance paths, 
+enabling faster operation with reduced delay. Selection depends on timing requirements and available floorplan space.
 
-### Review floorplan files and steps to view floorplan
+<img width="1297" height="517" alt="image" src="https://github.com/user-attachments/assets/bf52281e-2204-4a1b-b316-879b8aa27a6e" />
 
-After `run_floorplan` completes, we can review the output files. Inside the specific run directory (`design/picorv32a/runs/date_time/`), the `config.tcl` file is updated to show all the final parameters 
-that were actually used for the flow.
+### Placement
 
-The main physical output is located in the `runs/date_time/results/floorplan/` directory as a **.def (Design Exchange Format)** file (e.g., `picorv32a.floorplan.def`). 
-This is a text file that contains the physical layout data.
+After assigning proper dimensions to gates, we position these components on the floorplan. With the floorplan's input/output ports defined, the netlist specified, and each component sized, 
+we have the physical representation of logic gates. The next phase involves placing the netlist onto the floorplan, using connectivity information to position physical gates appropriately.
 
-If we open the `.def` file, we can find key information:
+The floorplan contains pre-placed cells from earlier stages. Placement ensures these pre-placed cell locations remain unchanged and prevents any cell placement over them. The physical netlist must be positioned
+to maintain logical connectivity while enabling circuit interaction with input/output ports for optimal timing and minimal delay.
 
-  * **`DIEAREA`**: This defines the chip's boundaries, for example, `(0 0) (660685 671405)`.
-  * **`UNITS DISTANCE MICRONS 1000`**: This is a critical line. It states that 1000 database units are equal to 1 micron ($\mu m$).
+Initially, we arrange remaining netlist components on the floorplan, positioning elements close to their respective input/output pins. However, some connections like FF1 of Stage 4 to Din4 remain distant. 
+Placement optimization addresses this issue.
 
-Using this, we can calculate the chip's physical dimensions:
+<img width="1305" height="633" alt="image" src="https://github.com/user-attachments/assets/82fe5d46-0f81-4603-9277-46906ce47604" />
 
-  * **Chip Width:** $660,685 \text{ units} / 1000 = 660.685 \; \mu m$
-  * **Chip Height:** $671,405 \text{ units} / 1000 = 671.405 \; \mu m$
+### Optimize Placement Using Estimated Wire-Length and Capacitance
 
-To visually inspect the layout, we use **Magic**. The following command loads the sky130 technology file, the merged LEF (which defines the cells), and our newly created DEF file (which places the cells and pins):
+**Optimize Placement**: Optimization resolves distance-related issues. Consider the FF1 to Din2 connection. Before routing or wiring, we estimate capacitances. The capacitance from Din2 to FF1 is substantial
+due to long wire length, causing high resistance. Transmitting signals over such distances makes reception at FF1 difficult. We insert intermediate elements to preserve signal integrity,
+successfully driving the input from Din2 to FF1. These intermediate elements are Repeaters—buffers that restore the original signal, create a replicated signal, and forward it. 
+This process continues until reaching the destination cell, maintaining signal integrity. While repeaters solve signal integrity issues, they consume additional floorplan area.
 
-```bash
-magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.floorplan.def
-```
+Stage 1 requires no repeaters for signal transmission. 
 
-### Review floorplan layout in Magic
+<img width="1297" height="637" alt="image" src="https://github.com/user-attachments/assets/6c347e43-aa6b-408c-8b17-00dd15345661" />
 
-Once Magic opens, we can see the floorplan layout. This includes the core area with the standard cell rows, the I/O pins, and the power rings. We can observe that the I/O pins are placed at equal distances around the core's perimeter.
+Stage 2, however, needs repeaters due to long wire length preventing signal transmission within acceptable range. Similar to Stage 2, Stage 3 requires buffer between gate2 and FF2.
 
-We can navigate the layout in Magic with these key commands:
+<img width="1295" height="622" alt="image" src="https://github.com/user-attachments/assets/bd091953-47d9-4e49-8ca6-2f6a01f5e017" />
 
-  * **Select:** Click on an object and press `s`.
-  * **Fit to screen:** Fits the layout to screen.
-  * **Zoom In:** Click on a location and press `z`.
-  * **Zoom Out:** Press `Shift+Z`.
+Stage 4 presents more complexity with multiple buffers and the wire estimates running over the standard cells. We must verify our work through timing analysis using ideal clocks.
+This analysis data confirms whether placement is correct.
 
-To get information about a selected object, we can open the **tkcon window** (Magic's console) and type the `what` command. This reveals details about the object:
+<img width="1306" height="631" alt="image" src="https://github.com/user-attachments/assets/50610928-8509-4c6c-b114-862d03fc6cd4" />
 
-  * Selecting a **horizontal pin** and using `what` shows that it is on the **metal 3** layer.
-  * Selecting a **vertical pin** and using `what` shows it is on the **metal 2** layer.
+### Need for Libraries and Characterization
 
-We can also see the **Decap cells** that have been placed along the border of the core, adjacent to the standard cell rows, to ensure power stability.
-The standard cell rows themselves (e.g., for mux, AND gates, etc.) are now defined and ready to be populated during the placement stage.
+Every IC design flow progresses through multiple stages. 
+* First is Logic Synthesis—converting RTL-coded functionality into valid hardware. Logic synthesis output is a gate arrangement representing the original RTL-described functionality.
+* Following logic synthesis is Floorplanning, where we import synthesis output and determine Core and Die sizes.
+* Next is Placement, positioning logic cells on the chip for optimal initial timing.
+* Then comes CTS (Clock Tree Synthesis), ensuring clock signals reach all points simultaneously with equal rise and fall times.
+* Next is Routing, which depends on flip-flop characterization.
+* Finally, STA (Static Timing Analysis) examines setup time, hold time, and maximum achievable circuit frequency.
+The common element across all stages: Gates or Cells. The collection of the cells or gates is called the library and if the proper characterization of the library is not done then all the stages gets affected.
+
+# Cell Design and Characterization Flows
+
+## Inputs for Cell Design Flow
+
+In Cell Design Flow, components like gates, flip-flops, and buffers are termed 'Standard Cells'. These standard cells reside in a collection called the 'Library', which contains multiple cells with different 
+functionality and also multiple cells with identical functionality but varying sizes. The standard cells also vary with the threshold voltage. 
+
+<img width="1122" height="718" alt="image" src="https://github.com/user-attachments/assets/9fb81de1-7119-4a13-88d9-47fc66145dee" />
+
+Examining an inverter from the library, the cell design flow proceeds as follows:
+
+The inverter must be represented through its shape, drive strength, power characteristics, and more. Cell design flow comprises three components:
+
+Inputs
+
+Design steps
+
+Outputs
+
+**1) Inputs**: Cell design requires PDKs, DRC and LVS rules, SPICE models, library specifications, and user-defined specifications. DRC & LVS rules provide tech files containing design rules and actual values 
+that can be coded. SPICE models describe threshold voltage equations. User defined specifications like the cell height and width, supply voltage, metal layers. Power rail and ground rail separation determines cell height.
+Cell width depends on timing requirements and drive strength.
+
+<img width="1111" height="650" alt="image" src="https://github.com/user-attachments/assets/e7dc5884-6318-413b-949b-abad73727b26" />
+
+**2) Design Steps**: Design encompasses three phases: circuit design, layout design, and characterization.
+
+Circuit Design involves two phases: First, implementing the function itself; second, modeling PMOS and NMOS transistors to meet library requirements. The main condition is that the sum of the drain currents is 0.
+With that we can model various parameters of the cell with the required switching theshold. These are done using SPICE simulations.
+
+**3) Outputs**
+
+Typical circuit design outputs include CDL (circuit description language) file, GDSII, LEF, and extracted spice netlist (.cir).
+
+<img width="1122" height="668" alt="image" src="https://github.com/user-attachments/assets/3116f911-e688-49b0-9e10-f32a32312027" />
+
+### Layout Design Step
+
+In Layout Design, the first phase implements the function using MOS transistors through PMOS and NMOS transistor sets. The second phase extracts PMOS and NMOS network graphs from the implemented design.
+
+<img width="1127" height="673" alt="image" src="https://github.com/user-attachments/assets/79668f18-c7c1-4193-936d-34ba69717d12" />
+
+After obtaining network graphs, the next phase determines Euler's path—a path traced only once.
+
+<img width="1142" height="673" alt="image" src="https://github.com/user-attachments/assets/e149675e-e408-443f-ba05-d5dfc8004909" />
+
+Following this, create a stick diagram based on Euler's path, derived from the circuit diagram.
+
+<img width="735" height="395" alt="image" src="https://github.com/user-attachments/assets/3b7d45e7-c1bb-4881-8ead-56616b714967" />
+
+Next, convert the stick diagram into a proper layout following previously discussed rules. Once the layout is complete, specifications like cell width, cell length, drain current, and pin locations are established.
+
+<img width="423" height="482" alt="image" src="https://github.com/user-attachments/assets/886de9d1-0129-4a75-907b-bcfdad431bc4" />
+
+The final phase extracts parasitics from the layout and characterizes it for timing. The layout design output is GDSII. After obtaining the extracted spice netlist, characterization provides timing, noise,
+and power information.
+
+### Typical Characterization Flow
+
+Building the characterization flow from available inputs:
+
+1. Read the model
+2. Read the extracted spice netlist
+3. Define or recognize buffer behavior
+4. Read inverter subcircuits
+5. Attach necessary power supplies
+6. Apply stimulus
+7. Provide necessary output capacitance
+8. Provide simulation commands (e.g., .tran for transient simulation, .dc for DC simulation).
+
+<img width="1147" height="633" alt="image" src="https://github.com/user-attachments/assets/e8d9256a-9456-43a6-808b-f440256e8261" />
+
+Next, compile inputs 1 through 8 into a configuration file for the characterization software "GUNA".
+
+<img width="1173" height="435" alt="image" src="https://github.com/user-attachments/assets/ee867712-badc-4bd8-8974-19c268fd15c7" />
+
+This software generates power, noise, and timing models.
+
+### Timing Threshold Definitions
+
+With back-to-back connected inverters, power sources, and applied stimulus, understanding different waveform threshold points becomes crucial—termed Timing threshold definitions.
+
+The term 'Slew_low_rise_thr' represents values near 0, typically around 20% or possibly 30%.
+
+<img width="1191" height="647" alt="image" src="https://github.com/user-attachments/assets/8a624557-4cb5-4680-bc94-81db0f774d2b" />
+
+Slew_high_rise_thr
+
+<img width="986" height="595" alt="image" src="https://github.com/user-attachments/assets/14ff63ec-b22b-421c-8cb9-8f06c439a355" />
+
+Slew_low_fall_thr
+
+<img width="983" height="602" alt="image" src="https://github.com/user-attachments/assets/cd6801b6-e36c-415c-825a-61e60686151a" />
+
+Slew_high_fall_thr
+
+<img width="972" height="605" alt="image" src="https://github.com/user-attachments/assets/eaaf9dc1-8375-45b8-b79b-d57e89c5661d" />
+
+Examining the input stimulus waveform (first buffer input) alongside the first buffer output, delay thresholds are also available, similar to slew. Extract rise and fall points from waveforms, 
+with thresholds typically around 50%.
+
+in_rise_thr
+
+<img width="1006" height="595" alt="image" src="https://github.com/user-attachments/assets/4a02f87a-5cf0-4c2e-9ff3-e6e812bb95b0" />
+
+in_fall_thr, typically valued at 50%
+
+<img width="987" height="598" alt="image" src="https://github.com/user-attachments/assets/f6fbb7a8-6a1d-4076-894e-3ea8ffe4d6cf" />
+
+out_rise_thr
+
+<img width="992" height="603" alt="image" src="https://github.com/user-attachments/assets/da082832-178a-4c20-9b82-c320dd70b108" />
+
+out_fall_thr
+
+<img width="1022" height="602" alt="image" src="https://github.com/user-attachments/assets/cc1c7a8e-78d5-497d-bf06-469926a8519a" />
+
+### Propagation Delay and Transition Time
+
+These values enable calculation of further parameters like propagation delay, current, and slews.
+
+Delay calculation requires subtracting in_rise_thr from out_rise_thr. Using a typical 50% value, examining the waveform: 
+
+<p align = "center"> Time delay = Time(out_thr) - time(in_thr). </p>
+
+<img width="1156" height="615" alt="image" src="https://github.com/user-attachments/assets/8a4987d0-a630-4674-80da-1651831a9eeb" />
+
+In the example with in_rise_thr and out_fall_thr at 50%, if the threshold point shifts upward, output precedes input, resulting in negative delay—which is unacceptable. Negative delay stems from poor threshold
+point selection, emphasizing the importance of proper threshold point choice.
+
+<img width="1180" height="616" alt="image" src="https://github.com/user-attachments/assets/1a2cdc00-edb1-46dc-aea2-a573f8ff2c7f" />
+
+Another example shows correctly chosen threshold points still yielding negative delay because output precedes input—also unacceptable.
+
+<img width="1177" height="612" alt="image" src="https://github.com/user-attachments/assets/81a178e8-d502-44a4-b968-4444fe5a161a" />
+
+<p align = "center"> Transition time = time(slew_high_rise_thr) - time(slew_low_rise_thr) </p>
+
+or
+
+<p align = "center"> Transition time = time(slew_high_fall_thr) - time(slew_low_fall_thr) </p>
+
+Examining a waveform demonstrates slew calculation.
+
+<img width="1201" height="576" alt="image" src="https://github.com/user-attachments/assets/535cc8a8-9fb0-49d5-86f0-4a581f86f88e" />
