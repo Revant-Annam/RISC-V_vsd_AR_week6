@@ -111,7 +111,7 @@ In the `Desktop/work/tools/openlane_working_dir/openlane/configuration` we can f
 **Commands (in OpenLANE interactive shell):**
 
 ```tcl
-# Continuing after the run_syntehsis
+# Continuing after the run_synthesis
 run_floorplan
 ```
 
@@ -142,9 +142,18 @@ $$ \text{Area} = 660.685 \times 671.405 \approx 443587.21 \text{ µm}^2 $$
 
 ```bash
 # To view Floorplan
-cd .../results/floorplan/
-magic -T ...sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.floorplan.def &
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/29-10_19-51/results/floorplan/
+magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.floorplan.def &
 ```
+
+Basic commands in Magic:
+- `S` -> Select a particular cell/wire or entire design.
+- `V` -> To fit the selected region to the screen
+- `Z` -> To zoom in
+- `Shift + z` -> zoom out
+- `what` -> After selecting a particular cell/wire by entering the what command in the command window of the magic we get the name of the cell/wire.
+
+Floorplan:
 
 <img width="1920" height="983" alt="image" src="https://github.com/user-attachments/assets/4ab07b45-9eea-4e98-84d2-d3b3173eff4c" />
 
@@ -161,6 +170,41 @@ magic -T ...sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.floorp
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9b78e855-f2d2-4b93-9369-9511792d7a54" />
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/50d32047-c28d-4906-98d6-beb223389c9e" />
+
+### 5\. Run 'picorv32a' Design Floorplan
+
+**Commands (in OpenLANE interactive shell):**
+
+```tcl
+# Continuing after the run_floorplan
+run_placement
+```
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/aa49d175-cce8-4954-b1a5-af7c62909989" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/7ca35939-1f6a-485c-b604-5c5e92ade25d" />
+
+### 4\. Explore Floorplan in Magic
+
+**Commands (in new terminals):**
+
+```bash
+# To view Placement
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/29-10_19-51/results/placement/
+
+# Command to load the placement def in magic tool
+magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.placement.def &
+```
+
+Placement:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/6e502a17-b6bd-4052-b10b-982cd8d47cfa" />
+
+Standard cells placed legally:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/be515545-5e76-4c84-ad5f-e2401af1c1f6" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/7e20c4bb-1c06-405a-a6bb-a6b3edb62d8f" />
 
 ### Key Learnings (Day 2)
 
