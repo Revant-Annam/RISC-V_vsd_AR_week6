@@ -36,8 +36,21 @@ In the `picorv32a` we can find the design files and the various TCL files.
 
 <img width="1280" height="768" alt="image" src="https://github.com/user-attachments/assets/91829527-b4f8-47ed-8a22-543f99fba14a" />
 
-The config.tcl
-**Commands to be run in the '%' prompt:**
+Any changes made in the 'config.tcl' file will alter the openlane in-built settings.
+
+<img width="1280" height="768" alt="image" src="https://github.com/user-attachments/assets/ae557bab-ebe4-4c6e-ac56-0b0d78fa3556" />
+
+In the `conig.tcl` file we can see the command which is the creating the pdk specific TCL file and then sourcing the .tcl file:
+`set filename $::env(OPENLANE_ROOT)/designs/$::env(DESIGN_NAME)/$::env(PDK)_$::env(STD_CELL_LIBRARY)_config.tcl
+if { [file exists $filename] == 1} {
+        source $filename
+}`
+
+Changes made in `sky130A_sky130_fd_sc_hd_config.tcl` will affect the settings in the `config.tcl`.
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/95fdcbaf-dfa5-483e-935a-66402fac8d4c" />
+
+**Commands to be run in the '%' prompt for the synthesis of picorv32a:**
 ```bash
 package require openlane 0.9
 prep -design picorv32a
@@ -46,7 +59,11 @@ exit
 exit
 ````
 
-### 2\. Calculate the Flop Ratio
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ac4e6266-6905-4202-8406-dfe506ed075d" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/7d9fc647-c4b0-4332-b162-336d0b5cdfc0" />
+
+### 3\. Calculate the Flop Ratio
 
 **Calculation:**
 $$ \text{Flop Ratio} = \frac{\text{Number of D Flip Flops}}{\text{Total Number of Cells}} = \frac{1613}{14876} \approx 0.1084 $$
