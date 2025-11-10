@@ -15,12 +15,30 @@ This repository documents week 6 of the journey through the **RISC-V SoC Tapeout
 ## Day 1 Labs: 'picorv32a' Synthesis & Flop Ratio
 This lab focuses on running the 'picorv32a' design through the OpenLANE synthesis flow and analyzing the resulting cell distribution.
 
-### 1. Run 'picorv32a' Design Synthesis
+### 1. Invoking openlane
 **Commands:**
 ```bash
 cd Desktop/work/tools/openlane_working_dir/openlane
 docker
 ./flow.tcl -interactive
+```
+The prompt will be changed to a **'%'** symbol.
+
+<img width="1280" height="768" alt="image" src="https://github.com/user-attachments/assets/b3d5e5be-d308-4f2a-a99c-08695816f17f" />
+
+### 2. Run 'picorv32a' Design Synthesis
+
+In this lab we are working on the `picorv32a` folder present in the `Desktop/work/tools/openlane_working_dir/openlane/designs/` directory.
+
+<img width="1280" height="768" alt="image" src="https://github.com/user-attachments/assets/e4e41c36-d4c1-4c6c-81c8-446287d37777" />
+
+In the `picorv32a` we can find the design files and the various TCL files.
+
+<img width="1280" height="768" alt="image" src="https://github.com/user-attachments/assets/91829527-b4f8-47ed-8a22-543f99fba14a" />
+
+The config.tcl
+**Commands to be run in the '%' prompt:**
+```bash
 package require openlane 0.9
 prep -design picorv32a
 run_synthesis
@@ -214,7 +232,7 @@ Added `set ::env(LIB_SYNTH)`, `set ::env(LIB_FASTEST)`, `set ::env(LIB_SLOWEST)`
 **Commands (in OpenLANE interactive shell):**
 
 ```tcl
-prep -design picorv32a -tag 24-03_10-03 -overwrite
+prep -design picorv32a -tag 29-10_19-51 -overwrite
 set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
 add_lefs -src $lefs
 set ::env(SYNTH_STRATEGY) "DELAY 3"
@@ -320,7 +338,7 @@ Ran all steps from synthesis through CTS, then generated the PDN.
 
 ```tcl
 # ... (prep, add_lefs, synthesis, floorplan, placement) ...
-# unset ::env(LIB_CTS) # If needed
+# unset ::env(LIB_CTS)
 run_cts
 
 # Now that CTS is done we can do power distribution network
@@ -336,7 +354,7 @@ gen_pdn
 
 ```bash
 # Change directory to path containing generated PDN def
-cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/26-03_08-45/tmp/floorplan/
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/29-10_19-51/tmp/floorplan/
 
 # Command to load the PDN def in magic tool
 magic -T .../sky130A.tech lef read ../../tmp/merged.lef def read 14-pdn.def &
@@ -376,7 +394,7 @@ Screenshot of the spef file
 
 ```bash
 # Change directory to path containing routed def
-cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/26-03_08-45/results/routing/
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/29-10_19-51/results/routing/
 
 # Command to load the routed def in magic tool
 magic -T .../sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.def &
@@ -437,6 +455,8 @@ report_checks -path_delay min_max -fields {slew trans net cap input_pins} -forma
 exit
 ```
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1d31600f-faf9-4410-bf0f-f44b79258507" />
+
 **Screenshots of Post-Route Analysis:**
 
 No DRC violations:
@@ -445,9 +465,9 @@ No DRC violations:
 
 STA for signoff:
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d1356dba-aeb7-43e3-a62d-ab59d9fef666" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/5d2eeec6-667e-4cd2-9573-062022d0cd8f" />
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4a7284b3-7ceb-48b2-8d32-65959aa12216" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a70870d4-4978-4e6d-9975-fef99da0ad44" />
 
 ### Key Learnings (Day 5)
 
