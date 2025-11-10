@@ -75,7 +75,7 @@ The STA analysis of the synthesized netlist can be found in the same folder:
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/980bdbc1-269b-4da3-8deb-c1fe0fbc5796" />
 
-### 3\. Calculate the Flop Ratio
+### 3. Calculate the Flop Ratio
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d2e5fa4e-f795-4806-9d00-943b8067b069" />
 
@@ -101,15 +101,22 @@ $$ \text{Percentage of DFFs} = \text{Flop Ratio} \times 100 \approx 10.84 \text{
 
 This lab covers the floorplanning and placement stages for the 'picorv32a' design.
 
-### 1\. Run 'picorv32a' Design Floorplan & Placement
+### 1\. Variables in Floorplan
+In the `Desktop/work/tools/openlane_working_dir/openlane/configuration` we can find a README.md file. In this file the description of the variables which can be changed to change how the floorplan runs. These variables can be changed based on the design requirements.
+
+<img width="1920" height="983" alt="image" src="https://github.com/user-attachments/assets/1b4caeca-2a79-41d3-b8df-df4a93e5e39a" />
+
+### 2\. Run 'picorv32a' Design Floorplan
 
 **Commands (in OpenLANE interactive shell):**
 
 ```tcl
-# Assuming you have already run prep -design picorv32a and run_synthesis
+# Continuing after the run_syntehsis
 run_floorplan
-run_placement
 ```
+<img width="1920" height="983" alt="image" src="https://github.com/user-attachments/assets/8cc88d90-7002-4934-9802-5612ba60a079" />
+
+<img width="1920" height="983" alt="image" src="https://github.com/user-attachments/assets/de389909-9f02-47b8-b1ca-e74538f3c6fe" />
 
 ### 2\. Calculate Die Area
 
