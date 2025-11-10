@@ -71,6 +71,10 @@ This is the netlist which has been created after the synthesis which is located 
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e6a918cd-4d39-44db-a286-09767b641a3b" />
 
+The STA analysis of the synthesized netlist can be found in the same folder:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/980bdbc1-269b-4da3-8deb-c1fe0fbc5796" />
+
 ### 3\. Calculate the Flop Ratio
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d2e5fa4e-f795-4806-9d00-943b8067b069" />
