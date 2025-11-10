@@ -63,7 +63,17 @@ exit
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/7d9fc647-c4b0-4332-b162-336d0b5cdfc0" />
 
+These will create a `runs` folder in the `picorv32a` folder which contains the reports, results, logs, etc specific to the time when the `prep` command was ran.
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/7c42104e-af08-471b-aab0-4d5a2a6a9ee3" />
+
+This is the netlist which has been created after the synthesis which is located in the `../picorv32a/runs/29-10_19-51/results/synthesis` folder:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e6a918cd-4d39-44db-a286-09767b641a3b" />
+
 ### 3\. Calculate the Flop Ratio
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d2e5fa4e-f795-4806-9d00-943b8067b069" />
 
 **Calculation:**
 $$ \text{Flop Ratio} = \frac{\text{Number of D Flip Flops}}{\text{Total Number of Cells}} = \frac{1613}{14876} \approx 0.1084 $$
