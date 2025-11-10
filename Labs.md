@@ -61,7 +61,6 @@ exit
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ac4e6266-6905-4202-8406-dfe506ed075d" />
 
-
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d2e5fa4e-f795-4806-9d00-943b8067b069" />
 
 These will create a `runs` folder in the `picorv32a` folder which contains the reports, results, logs, etc specific to the time when the `prep` command was ran.
@@ -115,18 +114,29 @@ In the `Desktop/work/tools/openlane_working_dir/openlane/configuration` we can f
 # Continuing after the run_syntehsis
 run_floorplan
 ```
+
 <img width="1920" height="983" alt="image" src="https://github.com/user-attachments/assets/8cc88d90-7002-4934-9802-5612ba60a079" />
 
 <img width="1920" height="983" alt="image" src="https://github.com/user-attachments/assets/de389909-9f02-47b8-b1ca-e74538f3c6fe" />
 
-### 2\. Calculate Die Area
+We can observe in the `sky130A_sky130_fd_sc_hd_config.tcl` present in the `picorv32a` folder that some of the variables related to the floorplan have been changed which will affect the values in the default openlane settings. To ensure that the changes made in the `sky130A_sky130_fd_sc_hd_config.tcl` file are affected during the run, we can check the `config.tcl` file present in the `runs` folder.
+
+`sky130A_sky130_fd_sc_hd_config.tcl` file:
+<img width="1920" height="983" alt="image" src="https://github.com/user-attachments/assets/b96490e4-1863-421b-8992-0a185befdcfd" />
+
+`config.tcl` file:
+<img width="1920" height="983" alt="image" src="https://github.com/user-attachments/assets/9c63923d-2449-4638-9e8b-d95c2cee7778" />
+
+### 3\. Calculate Die Area
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/66d5b8d2-013e-482d-b93f-9b22fadbe49b" />
 
 From the `.def` file `DIEAREA ( 0 0 ) ( 660685 671405 )`:
 $$ \text{Die Width} = \frac{660685}{1000} = 660.685 \text{ µm} $$
 $$ \text{Die Height} = \frac{671405}{1000} = 671.405 \text{ µm} $$
 $$ \text{Area} = 660.685 \times 671.405 \approx 443587.21 \text{ µm}^2 $$
 
-### 3\. Explore Floorplan & Placement in Magic
+### 4\. Explore Floorplan in Magic
 
 **Commands (in new terminals):**
 
@@ -134,11 +144,23 @@ $$ \text{Area} = 660.685 \times 671.405 \approx 443587.21 \text{ µm}^2 $$
 # To view Floorplan
 cd .../results/floorplan/
 magic -T ...sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.floorplan.def &
-
-# To view Placement
-cd .../results/placement/
-magic -T ...sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.placement.def &
 ```
+
+<img width="1920" height="983" alt="image" src="https://github.com/user-attachments/assets/4ab07b45-9eea-4e98-84d2-d3b3173eff4c" />
+
+<img width="1920" height="983" alt="image" src="https://github.com/user-attachments/assets/c3fc5d3a-4902-4002-96be-aebb6d9365e2" />
+
+<img width="1920" height="983" alt="image" src="https://github.com/user-attachments/assets/b8a7b18e-e77d-4c88-8f0a-bd538be2a003" />
+
+<img width="1920" height="983" alt="image" src="https://github.com/user-attachments/assets/7f8ba152-9858-4ae4-a4fd-cf905164ac84" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/78004918-dfab-402f-a16a-f4c6c5447c1b" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a17666d5-4c3b-4205-933f-1fac88cc58bf" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9b78e855-f2d2-4b93-9369-9511792d7a54" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/50d32047-c28d-4906-98d6-beb223389c9e" />
 
 ### Key Learnings (Day 2)
 
