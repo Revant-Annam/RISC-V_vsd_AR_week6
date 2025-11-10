@@ -171,7 +171,7 @@ Floorplan:
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/50d32047-c28d-4906-98d6-beb223389c9e" />
 
-### 5\. Run 'picorv32a' Design Floorplan
+### 5\. Run 'picorv32a' Design Placement
 
 **Commands (in OpenLANE interactive shell):**
 
@@ -216,6 +216,16 @@ Standard cells placed legally:
   * `magic -T ... lef read ... def read ... &`: Opens the Magic layout tool, reading the LEF (abstract library) and DEF (design placement) files.
   * `run_placement`: Legally places all standard cells within the core boundaries.
 
+This is changing the I/O mode from 1 to 2 will change the initial I/O configuration of equi-distant.
+
+Before chanigng:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/11b5e0ca-e415-449d-b8d7-ae25450dcafd" />
+
+After changing: 
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/925e187f-0fec-48a0-ac4c-e034743ea583" />
+
 -----
 
 ## Day 3 Labs: Custom Inverter Design & DRC Fix
@@ -227,12 +237,44 @@ This lab involves analyzing a custom inverter standard cell, performing post-lay
 **Commands:**
 
 ```bash
+# Change directory to openlane
 cd Desktop/work/tools/openlane_working_dir/openlane
-git clone [https://github.com/nickson-jose/vsdstdcelldesign](https://github.com/nickson-jose/vsdstdcelldesign)
+
+# Clone the git repo for the inverter
+git clone [https://github.com/nickson-jose/vsdstdcelldesign]https://github.com/nickson-jose/vsdstdcelldesign)
+
+# Go to the vsdstdcelldesign directory
 cd vsdstdcelldesign
-cp .../sky130A.tech .
+
+# Copy the Magic tech file to open the inverter in Magic
+cp /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech .
+
+# To open the inverter in the Magic
 magic -T sky130A.tech sky130_inv.mag &
 ```
+Cloning of the git repository and copying the tech file to the path:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/19b00884-be30-40b7-b63e-ea9c1fbaf022" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/64956078-7b9d-42e9-b7b1-122eeba4f1ab" />
+
+Opening the inverter in the Magic:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/041ae052-a85d-4783-ad62-a761d192cd24" />
+
+Understanding different layers in the Inverter:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3aab8e67-f6bc-4409-becf-5bcc1a31c40f" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2c3b4a59-499a-4b69-9eca-1de02fbf53ee" />
+
+By clicking `S` 3 times hovering on a particular node the entire connectivity of the node is shown. Here I have seen the connectivity for `VPWR`, `VGND` and `Y`:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/04acf4ae-31c6-4462-91ea-8c7264bb274e" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3256578e-54d2-4a17-85a1-b65abe99b1c5" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ff53a3f8-9e4a-4f3c-927f-a4f68707f0ce" />
 
 ### 2\. SPICE Extraction of Inverter
 
