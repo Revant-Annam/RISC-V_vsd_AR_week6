@@ -378,9 +378,31 @@ magic -d XR &
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8a0e06b5-d4df-44c9-b993-047098138d87" />
 
-**Corrections Made:**
+**DRC Rules:**
+
+  * **`met3`:** Checking the DRC errors present in the `met3.mag`. The file is located in the current working directory and can be invoked into the MAGIC using the GUI. The error here is specifically m3.2 which is a spacing error. The details of the rule can be seen in this website: [DRC rules m3](https://skywater-pdk.readthedocs.io/en/main/rules/periphery.html#m3)
+
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/135a7540-3e24-4b4e-a102-7e6b5082445b" />
+
+    Checking the DRC in the m3.4 which is the enclosement of the via within m3: 
+
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ac93e6f4-da1b-4921-8e08-d24dc9bb99a2" />
+
+    Using the box command we can see the distance and then check with the rule to find the DRC error.
+    
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1c29e643-15c7-4d0d-94e7-19526c4930ec" />
 
   * **`poly.9` (Simple Rule):** Fixed incorrect poly spacing rule.
+
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/6b87166d-3cb6-4e7b-b013-6498a8d7ee41" />
+
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4e351c38-0ad5-47ee-82fb-d726b3f6a1ba" />
+
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4ee8665c-3352-43f1-9eab-11229de9a046" />
+
+    
+
+
   * **`difftap.2` (Simple Rule):** Fixed incorrect tap-to-diff spacing rule.
   * **`nwell.4` (Complex Rule):** Fixed rule to correctly check for n-well tap presence.
 
