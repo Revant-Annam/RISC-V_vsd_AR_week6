@@ -141,9 +141,10 @@ We can observe in the `sky130A_sky130_fd_sc_hd_config.tcl` present in the `picor
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/66d5b8d2-013e-482d-b93f-9b22fadbe49b" />
 
 From the `.def` file `DIEAREA ( 0 0 ) ( 660685 671405 )`:
-$$ \text{Die Width} = \frac{660685}{1000} = 660.685 \text{ µm} $$
-$$ \text{Die Height} = \frac{671405}{1000} = 671.405 \text{ µm} $$
-$$ \text{Area} = 660.685 \times 671.405 \approx 443587.21 \text{ µm}^2 $$
+
+$$\text{Die Width} = \frac{660685}{1000} = 660.685 \text{ µm}$$
+$$\text{Die Height} = \frac{671405}{1000} = 671.405 \text{ µm}$$
+$$\text{Area} = 660.685 \times 671.405 \approx 443587.21 \text{ µm}^2$$
 
 ### 4\. Explore Floorplan in Magic
 
