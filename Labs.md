@@ -398,10 +398,38 @@ magic -d XR &
 
     <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4e351c38-0ad5-47ee-82fb-d726b3f6a1ba" />
 
-    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4ee8665c-3352-43f1-9eab-11229de9a046" />
-
+    The rule poly.9 shows no drc violation even though spacing < 0.48u. This must be changed in the sky130A.tech drc rules section.
     
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4ee8665c-3352-43f1-9eab-11229de9a046" />
+    
+    Updating the sky130A.tech file:
 
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/86f6c8fa-0941-4807-b695-12647b12dbc9" />
+
+    Loading the tech file and checking the error can be done with the commands:
+
+        ```bash
+        # Loading updated tech file
+        tech load sky130A.tech
+
+        # Must re-run drc check to see updated drc errors
+        drc check
+
+        # Selecting region displaying the new errors and getting the error messages 
+        drc why
+        ```
+    
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1702a79d-58e2-4f0f-9d47-763e51f6c585" />
+
+    Correcting another poly rule which is not mentioned in the sky130A.tech
+
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/5c4931be-8b07-4a46-89a2-95b42fe9af5e" />
+
+    Updation is the file under `poly`:
+
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c8094853-e0f1-4cf2-bc16-f613a448d7a0" />
+
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/08874438-80bf-4a5e-b477-8a45d09ce497" />
 
   * **`difftap.2` (Simple Rule):** Fixed incorrect tap-to-diff spacing rule.
   * **`nwell.4` (Complex Rule):** Fixed rule to correctly check for n-well tap presence.
