@@ -309,9 +309,7 @@ Spice netlsit generated:
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/891d5514-b085-43d3-abe4-f150b31926a8" />
 
-From the spice netlist we can understand the connecting of the cells which results in a inverter. Here we need to change the scale to match it to out design.
-
-Current dimensions:
+From the spice netlist we can understand the connecting of the cells which results in a inverter. 
 We can enable the grid in the magic by pressing `g`.
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8bbda704-8f90-4d9b-a997-40e63bc44813" />
@@ -392,7 +390,7 @@ magic -d XR &
     
     <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1c29e643-15c7-4d0d-94e7-19526c4930ec" />
 
-  * **`poly.9` (Simple Rule):** Fixed incorrect poly spacing rule.
+  * **`poly.9` (Simple Rule):** Fixed incorrect poly spacing rule. More details regarding the poly rule can be seen in this website [DRC rules poly](https://skywater-pdk.readthedocs.io/en/main/rules/periphery.html#poly)
 
     <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/6b87166d-3cb6-4e7b-b013-6498a8d7ee41" />
 
@@ -432,7 +430,34 @@ magic -d XR &
     <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/08874438-80bf-4a5e-b477-8a45d09ce497" />
 
   * **`difftap.2` (Simple Rule):** Fixed incorrect tap-to-diff spacing rule.
-  * **`nwell.4` (Complex Rule):** Fixed rule to correctly check for n-well tap presence.
+  * **`nwell.4` (Complex Rule):** Incorrectly implemented nwell.4 rule no drc violation even though no tap present in nwell. Details regarding the nwell rule can be viewed in the website [DRC rules nwell](https://skywater-pdk.readthedocs.io/en/main/rules/periphery.html#nwell). Updating the .tech file:
+
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3447b715-da4d-40e2-b680-e7e4925d36fc" />
+
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/41f09623-fbe5-4dbb-bbd7-dc93e0761b81" />
+
+    Then using these commands we can check the error:
+    ```bash
+    # Loading updated tech file
+    tech load sky130A.tech
+
+    # Change drc style to drc full
+    drc style drc(full)
+
+    # Must re-run drc check to see updated drc errors
+    drc check
+
+    # Selecting region displaying the new errors and getting the error messages 
+    drc why
+    ```
+
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8f2aff73-99bd-4c94-8d99-2782e637cec4" />
+
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2db2928e-a038-4cc0-9339-a440085916e9" />
+
+    Corrected other nwell's by adding a tap into them:
+
+    <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/06ab37c0-710c-4b40-a760-4bd48aa4da47" />
 
 ### Key Learnings (Day 3)
 
@@ -460,6 +485,26 @@ magic -d XR &
 This lab covers integrating the custom inverter into the `picorv32a` flow, optimizing synthesis, and performing manual/automated timing analysis and fixes.
 
 ### 1\. Verify Standard Cell Layout Conditions
+
+Inside the `/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/openlane/sky130_fd_sc_hd` directory we can find the tracks.info file which tells us the routing tracks used during the routing process. The metal layers used in the inverter are `li1` so the dimensions of the inverter must be in the multiples of `li1` dimensions mentioned in the `tracks.info`. We should also ensure that the ports must be at the intersection of the horizontal and the vertical tracks for correct routing.
+
+Commands for tkcon window to set grid as tracks of `li1` layer:
+
+```bash
+# Get syntax for grid command
+help grid
+
+# Set grid values accordingly
+grid 0.46um 0.34um 0.23um 0.17um
+```
+
+Grid before running the commands:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d394729f-8394-408e-8fd2-5d48ff6cc19a" />
+
+Grid after running the commands:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d787d62b-c41f-4794-b631-c53cad54d36c" />
 
 Verified the custom inverter layout against standard cell requirements (port alignment, width, height).
 
