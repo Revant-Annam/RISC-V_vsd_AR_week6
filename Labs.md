@@ -281,30 +281,78 @@ By clicking `S` 3 times hovering on a particular node the entire connectivity of
 **Commands (in tkcon window):**
 
 ```tcl
+# To extract a spice from the layout
+# COnfirms the location for the spice file to be generated.
+pwd
+
+# For converting into a .ext (extraction file)
 extract all
+
+# For converting into a spice netlist along with parasitic capacitance and resistance
 ext2spice cthresh 0 rthresh 0
 ext2spice
 ```
 
-### 3\. Post-Layout ngspice Simulations
+Converting into a extraction file:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/0d4d865c-d7af-4cf1-a108-50608e69f615" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d1ab400f-3ea2-4905-986a-b7f6df7d3ffa" />
+
+Converting into a spice netlist:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3176db28-fcd4-4342-89b5-6b248daaff63" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/37541f8c-1d32-4a9e-bc31-b27002518477" />
+
+Spice netlsit generated:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/891d5514-b085-43d3-abe4-f150b31926a8" />
+
+From the spice netlist we can understand the connecting of the cells which results in a inverter. Here we need to change the scale to match it to out design.
+
+Current dimensions:
+We can enable the grid in the magic by pressing `g`.
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8bbda704-8f90-4d9b-a997-40e63bc44813" />
+
+After have to add the library from which the standard nmos and pmos are used. We have to change the nmos and pmos name as per the .lib file. We also have to provide supply voltages. The connections with the supply voltages is present but the supply is not present in the netlist. VPWR is a pulse while VGND is a constant voltage. We can also include the analysis which we need to perform. Here we are running a transient analysis. We also change any parasitic values if needed.
+
+The updated netlist:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/28a4912b-7cad-4224-be4a-8b7791bd3b29" />
+
+### 3\. Post-Extraction ngspice Simulations
 
 **Commands:**
 
 ```bash
+#Invoking ngspice and plotting the transient analysis
 ngspice sky130_inv.spice
 plot y vs time a
 ```
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/f4fb88b5-ff87-4101-ba6a-bf619c4ed2e4" />
+
+Waveform of the inverter is as expected:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2e3e38cb-d050-4e9c-8340-4b46e7c53795" />
+
+Calculating the Rise time, fall time, Rise cell delay and the Fall cell delay using the commands as used in Week4.
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/be72b634-25e8-4834-8067-1e44bc818ddd" />
+
 **Timing Calculations:**
 
-  * **Rise Transition Time:** $T_{rise} = \mathbf{63.96 \text{ ps}}$
-  * **Fall Transition Time:** $T_{fall} = \mathbf{41.9 \text{ ps}}$
-  * **Rise Cell Delay:** $D_{rise} = \mathbf{61.36 \text{ ps}}$
-  * **Fall Cell Delay:** $D_{fall} = \mathbf{20 \text{ ps}}$
+  * **Rise Transition Time:** $T_{rise} = \mathbf{137.774 \text{ ps}}$
+  * **Fall Transition Time:** $T_{fall} = \mathbf{50.345 \text{ ps}}$
+  * **Rise Cell Delay:** $D_{rise} = \mathbf{108.789 \text{ ps}}$
+  * **Fall Cell Delay:** $D_{fall} = \mathbf{49.429 \text{ ps}}$
 
 ### 4\. Fix DRC Rules in Magic Tech File
 
 **Setup Commands:**
+
+To understand the basic rules and learning more about magic we can look into the website:
 
 ```bash
 cd
