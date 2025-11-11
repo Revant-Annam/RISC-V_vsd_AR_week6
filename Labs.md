@@ -80,15 +80,24 @@ The STA analysis of the synthesized netlist can be found in the same folder:
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/7d9fc647-c4b0-4332-b162-336d0b5cdfc0" />
 
 **Calculation:**
-$$ \text{Flop Ratio} = \frac{\text{Number of D Flip Flops}}{\text{Total Number of Cells}} = \frac{1613}{14876} \approx 0.1084 $$
-$$ \text{Percentage of DFFs} = \text{Flop Ratio} \times 100 \approx 10.84 \text{ \%} $$
+* **DFFs:** 1613
+* **Total Cells:** 14876
+* **Ratio:** $1613 / 14876 \approx 0.1084$
+* **Percentage:** $10.84\%$
 
 ### Key Learnings (Day 1)
 
-  * [Your key learning point 1...]
+* **Understanding the OpenLANE Interactive Flow:** Learned the basic Tcl commands to run a design through OpenLANE interactively: `package require openlane`, `prep -design <design_name>`, and `run_synthesis`.
+* **Navigating the File Structure:** Became familiar with the OpenLANE directory structure, specifically how designs are organized in the `designs/` folder and how all outputs (logs, results, reports) are generated inside a timestamped `runs/` directory.
+* **Configuration Files:** Understood the config hierarchy, where a design's `config.tcl` sources a PDK-specific config file (e.g., `sky130A..._config.tcl`) to set up the flow.
+* **Locating Synthesis Outputs:** Learned to find the most critical synthesis results:
+    * **Gate-Level Netlist:** The synthesized design logic (e.g., `.../results/synthesis/picorv32a.v`).
+    * **Statistics Report:** The post-synthesis cell report (e.g., `.../reports/synthesis/1-synthesis.stat.txt`).
+    * **STA Report:** The static timing analysis results (`.sta.rpt`).
+* **Basic Design Analysis (Flop Ratio):** Learned to parse the statistics report to find the total cell count and the specific count of flip-flops (like `sky130_fd_sc_hd__dfxtp_1`).
+* **Flop Ratio as a Metric:** Calculating the flop ratio gives a quick, high-level insight into the design's composition, showing the ratio of sequential logic (flip-flops) to the total logic. **10.84%** indicates that roughly 1 in 10 cells is a flip-flop, which is typical for a processor core that balances registers and control/datapath logic.
 
 ### Command Explanations (Day 1)
-
   * `docker`: Starts the OpenLANE Docker container.
   * `./flow.tcl -interactive`: Starts the OpenLANE flow in interactive mode.
   * `package require openlane 0.9`: Loads the necessary OpenLANE Tcl package.
@@ -184,7 +193,7 @@ run_placement
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/7ca35939-1f6a-485c-b604-5c5e92ade25d" />
 
-### 4\. Explore Floorplan in Magic
+### 6\. Explore Placement in Magic
 
 **Commands (in new terminals):**
 
@@ -208,7 +217,12 @@ Standard cells placed legally:
 
 ### Key Learnings (Day 2)
 
-  * [Your key learning point 1...]
+* **Understanding the Floorplan:** The `run_floorplan` command is the first step in physical design. It defines the total **Die Area**, creates the **Core Area** (where standard cells will go), and places the **I/O pins** on the periphery.
+* **Visual Inspection with Magic:** Learned how to use the `magic` layout viewer to load the technology file (`.tech`), the library abstracts (**LEF**), and the design layout (**DEF**). This allows to visually verify each stage of the PnR flow.
+* **Reading a DEF File:** Learned to find key information in the `.def` file, specifically the `DIEAREA` coordinates.
+* **DBU-to-Micron Conversion:** Learned the standard conversion factor (1000 DBU per micron for SKY130) to calculate the physical die dimensions (e.g., $660.685 \text{ µm} \times 671.405 \text{ µm}$).
+* **Understanding Placement:** The `run_placement` command populates the empty core area. It takes all the standard cells (gates, flops) from the synthesis netlist and places them into legal, non-overlapping "standard cell rows."
+* **Configuration Overrides:** understood the configuration hierarchy. Variables set in the design-specific `sky130A..._config.tcl` (like `FP_IO_MODE`) take precedence over default settings and are recorded in the final `runs/.../config.tcl` for that specific execution.
 
 ### Command Explanations (Day 2)
 
@@ -314,7 +328,7 @@ We can enable the grid in the magic by pressing `g`.
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8bbda704-8f90-4d9b-a997-40e63bc44813" />
 
-After have to add the library from which the standard nmos and pmos are used. We have to change the nmos and pmos name as per the .lib file. We also have to provide supply voltages. The connections with the supply voltages is present but the supply is not present in the netlist. VPWR is a pulse while VGND is a constant voltage. We can also include the analysis which we need to perform. Here we are running a transient analysis. We also change any parasitic values if needed.
+After have to add the library from which the standard nmos and pmos are used. We have to change the nmos and pmos name as per the .lib file. We also have to provide supply voltages. The connections with the supply voltages is present but the supply is not present in the netlist. A is a pulse while VPWR, VGND is a constant voltage. We can also include the analysis which we need to perform. Here we are running a transient analysis. We also change any parasitic values if needed.
 
 The updated netlist:
 
@@ -429,7 +443,6 @@ magic -d XR &
 
     <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/08874438-80bf-4a5e-b477-8a45d09ce497" />
 
-  * **`difftap.2` (Simple Rule):** Fixed incorrect tap-to-diff spacing rule.
   * **`nwell.4` (Complex Rule):** Incorrectly implemented nwell.4 rule no drc violation even though no tap present in nwell. Details regarding the nwell rule can be viewed in the website [DRC rules nwell](https://skywater-pdk.readthedocs.io/en/main/rules/periphery.html#nwell). Updating the .tech file:
 
     <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3447b715-da4d-40e2-b680-e7e4925d36fc" />
@@ -461,7 +474,18 @@ magic -d XR &
 
 ### Key Learnings (Day 3)
 
-  * [Your key learning point 1...]
+* **Layout-to-Simulation Flow:** Successfully run a full post-layout verification flow: viewing the layout (`.mag`), extracting a netlist (with parasitics), creating a testbench, and simulating it in `ngspice`.
+* **Parasitic-Aware Extraction:** Learned the importance of the `ext2spice cthresh 0 rthresh 0` command. This tells Magic to extract parasitic capacitances (and resistances), which is essential for getting accurate, real-world timing data, as opposed to an ideal, pre-layout simulation.
+* **SPICE Testbench Creation:** Learned that a raw extracted `.spice` file is not runnable by itself. It must be edited to:
+    1.  **`.include`** the foundry model files (for the NMOS/PMOS transistors).
+    2.  Add **voltage sources** (a DC supply for `VPWR` and a `PULSE` source for the input `A`).
+    3.  Add **analysis commands** (like `.tran`) to tell the simulator what to do.
+* **Cell Characterization:** Using `ngspice` we can now perform basic cell characterization, to measuring key performance metrics like transition times ($T_{rise}$/$T_{fall}$) and propagation delays ($D_{rise}$/$D_{fall}$).
+* **DRC Tech File Debugging:**  
+    * Learned to use test layouts (`drc_tests`) to find bugs in the `sky130A.tech` file.
+    * Learned the iterative debugging loop: `drc check` -> `drc why` -> edit `.tech` file -> `tech load` -> `drc check` again.
+    * Learned how to fix both simple (`spacing`) and complex (`cthresh`) rules.
+    * Learned that complex rules (like `nwell.4`, which checks for taps) require `drc style drc(full)` to be evaluated.
 
 ### Command Explanations (Day 3)
 
@@ -606,7 +630,6 @@ run_synthesis
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/cf4396f3-4d8b-44e7-8f52-a338fa2445e0" />
 
-There is a large 
 ### 6\. Run Floorplan & Placement with Custom Cell
 
 **Commands (in OpenLANE interactive shell):**
@@ -949,9 +972,27 @@ echo $::env(CTS_CLK_BUFFER_LIST)
 
 ### Key Learnings (Day 4)
 
-  * [Your key learning point 1...]
-  * [Your key learning point 2...]
-  * [Your key learning point 3...]
+* **Standard Cell PnR-Readiness:** Learned that for a custom cell to be used in PnR, it's not enough to just have a layout. The layout must:
+    * Have dimensions (width and height) that are **integer multiples of the PDK's track pitches** (`tracks.info`).
+    * Have its I/O pins placed **on-grid** (at the intersection of tracks).
+    * Successfully verified this using the `grid` command in Magic.
+* **Integrating Custom Cells:** Learned the full procedure to add a new cell to the OpenLANE flow:
+    1.  **Generate LEF:** Create the layout abstract using `lef write`.
+    2.  **Copy Files:** Place the new `.lef` and the characterization `.lib` files into the design's `src` folder.
+    3.  **Update Config:** Modify the `config.tcl` to point `::env(LIB_SYNTH)` to the local `.lib` file and add the new LEF file path to `::env(EXTRA_LEFS)`.
+* **Visual Verification in PnR:** Verified the integration worked by running `run_placement` and then using the `expand` command in Magic to see layout of the `sky130_vsdinv` cell, confirming it was placed as a full, un-abstracted cell.
+* **Automated Timing Optimization:** Learned to use `::env(SYNTH_STRATEGY)` and `::env(SYNTH_SIZING)` to tell the synthesis tool to prioritize **timing (delay) over area**. This is a fundamental **timing vs. area tradeoff**.
+* **Manual Timing ECO (Engineering Change Order):**
+    * Learned to use the standalone **OpenSTA** (`sta`) tool for deep-dive timing analysis.
+    * Performed a manual ECO by finding a failing path (`report_checks`), investigating its fanout (`report_net`), and manually swapping a weak cell with a stronger one (`replace_cell ... or3_4`).
+    * Saved this new, manually-fixed netlist using `write_verilog`.
+* **Running Clock Tree Synthesis (CTS):** Successfully ran the `run_cts` command, which inserts buffers to build the clock tree and balance latencies. Learned that this step is controllable, for example by editing the `::env(CTS_CLK_BUFFER_LIST)`.
+* **Full Post-Layout STA (OpenROAD):** Learned how to run a final, high-accuracy STA check inside OpenROAD after CTS. This involves:
+    1.  Loading the design database (`read_lef`, `read_def`, `read_verilog`).
+    2.  Loading the timing libraries (`read_liberty`).
+    3.  Linking the design (`link_design`).
+    4.  Reading the constraints (`read_sdc`).
+    5.  **Crucially,** running `set_propagated_clock` to tell the tool to use realistic, calculated clock delays instead of ideal ones.
 
 ### Command Explanations (Day 4)
 
@@ -1118,26 +1159,18 @@ STA for signoff:
 
 ### Key Learnings (Day 5)
 
-  * [Your key learning point 1...]
-  * [Your key learning point 2...]
-  * [Your key learning point 3...]
+* **Generating the Power Grid (PDN):** The `gen_pdn` command is responsible for creating the power and ground "scaffolding" of the chip. We can see in Magic how this lays down a grid of higher-level metal (like `met4`, `met5`) straps and rings that will deliver `VPWR` and `VGND` to the standard cell rows.
+* **Detailed Routing:** The `run_routing` command uses the lower-level metal layers (like `li1`, `met1`, `met2`, `met3`) to create the physical wires that connect all the cell pins, following the logical netlist.
+* **Parasitic Extraction:** After routing, the design is no longer just a logical netlist; it's a physical layout where every wire has a real length, width, and proximity to other wires. This creates parasitic **resistance (R)** and **capacitance (C)**. The SPEF file (`.spef`) is the standard format for storing these R and C values for every single net in your design.
+* **The Final Signoff STA:** The post-route STA (Section 3) is the **most accurate timing analysis** possible.
+    * Unlike pre-synthesis or post-synthesis STA, which *estimates* wire delays, this final analysis uses the **`read_spef`** command.
+    * This command annotates every net in the design with its *actual, measured* parasitic R and C values from the real layout.
+    * This provides a highly accurate, "signoff-quality" report. Your final screenshot, showing positive slack (WNS = 0.00), confirms that your design **meets timing** even after all physical and parasitic effects are accounted for.
 
 ### Command Explanations (Day 5)
 
   * `gen_pdn`: (OpenLANE Tcl) Generates the Power Distribution Network (power and ground straps/rings) based on the settings in `config.tcl`.
   * `run_routing`: (OpenLANE Tcl) Runs the detailed router (TritonRoute) to connect all the standard cells and I/O pins.
   * `magic ... def read picorv32a.def &`: (Bash) Loads the *final* routed DEF file, which contains all placed cells, the PDN, and all signal routes.
-  * `python3 main.py ...`: (Bash) Runs the external Python-based SPEF extractor to generate parasitic data from the final LEF and DEF files.
   * `read_spef <path>`: (OpenROAD Tcl) Reads a SPEF (Standard Parasitic Exchange Format) file. This annotates the design with realistic parasitic resistance (R) and capacitance (C) values from the physical routing, enabling a highly accurate final timing analysis.
   * `report_checks ...`: (OpenROAD Tcl) Generates the final timing report, which is now "post-route" and "parasitic-aware," representing the most accurate timing signoff.
-
------
-
-## Notes on Digital and Analog Block Interaction
-
------
-
-## Observations on DRC, LVS, and STA Inter-dependencies
-
-```
-```
