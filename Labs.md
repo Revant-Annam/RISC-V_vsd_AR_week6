@@ -352,15 +352,31 @@ Calculating the Rise time, fall time, Rise cell delay and the Fall cell delay us
 
 **Setup Commands:**
 
-To understand the basic rules and learning more about magic we can look into the website:
+To understand the basic rules and learning more about magic we can look into the website: [Magic](http://opencircuitdesign.com/magic/)
+
+To learn more about the tecchnology file we can look into the website: [sky130 pdk](https://skywater-pdk.readthedocs.io/en/main/)
 
 ```bash
+# Go to the home directory and then download the drc_test.tgz
 cd
 wget [http://opencircuitdesign.com/open_pdks/archive/drc_tests.tgz](http://opencircuitdesign.com/open_pdks/archive/drc_tests.tgz)
+
+# Extracting the drc_tests folder
 tar xfz drc_tests.tgz
 cd drc_tests
+
+# Command to view .magicrc file
+gvim .magicrc
+
+# Opening magic 
 magic -d XR &
 ```
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e47e5eec-a133-4174-8be0-df66905d8fbf" />
+
+.magicrc file:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8a0e06b5-d4df-44c9-b993-047098138d87" />
 
 **Corrections Made:**
 
