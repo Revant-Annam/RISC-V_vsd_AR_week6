@@ -1,4 +1,4 @@
-# Week6 - Lab Documentation
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/6725b093-3f7a-4d7b-b9ae-6759b5a19e92" /># Week6 - Lab Documentation
 
 This repository documents week 6 of the journey through the **RISC-V SoC Tapeout Program**, documenting all labs and key learnings.
 
@@ -486,7 +486,7 @@ This lab covers integrating the custom inverter into the `picorv32a` flow, optim
 
 ### 1\. Verify Standard Cell Layout Conditions
 
-Inside the `/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/openlane/sky130_fd_sc_hd` directory we can find the tracks.info file which tells us the routing tracks used during the routing process. The metal layers used in the inverter are `li1` so the dimensions of the inverter must be in the multiples of `li1` dimensions mentioned in the `tracks.info`. We should also ensure that the ports must be at the intersection of the horizontal and the vertical tracks for correct routing.
+Inside the `/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/openlane/sky130_fd_sc_hd` directory we can find the tracks.info file which tells us the routing tracks used during the routing process. The metal layers used in the inverter are `li1` so the dimensions of the inverter must be in the multiples of `li1` dimensions mentioned in the `tracks.info`. We should also ensure that the ports must be at the intersection of the horizontal and the vertical tracks for correct routing. This is already present. 
 
 Commands for tkcon window to set grid as tracks of `li1` layer:
 
@@ -506,7 +506,7 @@ Grid after running the commands:
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d787d62b-c41f-4794-b631-c53cad54d36c" />
 
-Verified the custom inverter layout against standard cell requirements (port alignment, width, height).
+The width pitch and the height pitch must be in the multiples of the grid which is verified by checking the number of tracks covering the design.
 
   * $$ \text{Width} = 1.38 \text{ µm} = 0.46 \text{ µm} \times 3 $$ (Verified)
   * $$ \text{Height} = 2.72 \text{ µm} = 0.34 \text{ µm} \times 8 $$ (Verified)
@@ -516,38 +516,97 @@ Verified the custom inverter layout against standard cell requirements (port ali
 **Commands (in tkcon window):**
 
 ```tcl
+# Command to save as
 save sky130_vsdinv.mag
-lef write
+
+# Command to open custom inverter layout in magic
+magic -T sky130A.tech sky130_vsdinv.mag &
 ```
+
+Saving the .mag file:
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/0a30447a-293a-499e-99e2-c3ad544d7916" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a9e92c4a-2a4b-40de-824a-a20da9b53cb3" />
+
+The `.lef` file must be generated. After opening the saved `.mag` file in the magic we can enter the command `lef write` this generates the `.lef` file. 
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/482bd453-c3d8-451f-a422-09693659ff93" />
 
 ### 3\. Copy LEF and LIB files to 'picorv32a' Source
 
 **Commands (in bash terminal):**
 
 ```bash
-cp sky130_vsdinv.lef .../picorv32a/src/
-cp libs/sky130_fd_sc_hd__* .../picorv32a/src/
+# Copy lef file
+cp sky130_vsdinv.lef ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
+
+# List and check whether it's copied
+ls ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
+
+# Copy lib files
+cp libs/sky130_fd_sc_hd__* ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
+
+# List and check whether it's copied
+cd ~/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/src/
+ls -ltr
 ```
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1977a545-322b-4392-9771-1345db13ec89" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a1dcad27-763f-4658-9268-d23c7890b910" />
+
+We can see in the standard library that the `sky130_vsdinv` cell characterization is present in the `sky130_fd_sc_hd__typical.lib` file. 
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ebb8d84e-0140-4568-b7e3-00e86bdce324" />
 
 ### 4\. Edit 'config.tcl' to Include Custom Cell
 
-Added `set ::env(LIB_SYNTH)`, `set ::env(LIB_FASTEST)`, `set ::env(LIB_SLOWEST)`, `set ::env(LIB_TYPICAL)`, and `set ::env(EXTRA_LEFS)` to `config.tcl`.
+Added `changes in the `config.tcl`:
+```tcl
+set ::env(LIB_SYNTH) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__typical.lib"
+set ::env(LIB_FASTEST) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__fast.lib"
+set ::env(LIB_SLOWEST) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__slow.lib"
+set ::env(LIB_TYPICAL) "$::env(OPENLANE_ROOT)/designs/picorv32a/src/sky130_fd_sc_hd__typical.lib"
+
+set ::env(EXTRA_LEFS) [glob $::env(OPENLANE_ROOT)/designs/$::env(DESIGN_NAME)/src/sky130_vsdinv.lef]
+```
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/6b52ff8d-3a1a-41d9-bd87-1657d8dcbcec" />
 
 ### 5\. Run Synthesis & Optimize
 
 **Commands (in OpenLANE interactive shell):**
 
 ```tcl
+# Change directory to openlane flow directory
+cd Desktop/work/tools/openlane_working_dir/openlane
+
+# Since we have aliased the long command to 'docker' we can invoke the OpenLANE flow docker sub-system by just running this command
+docker
+
+# Now that we have entered the OpenLANE flow contained docker sub-system we can invoke the OpenLANE flow in the Interactive mode using the following command
+./flow.tcl -interactive
+
+# Now that OpenLANE flow is open we have to input the required packages for proper functionality of the OpenLANE flow
+package require openlane 0.9
+
+# Now the OpenLANE flow is ready to run any design and initially we have to prep the design creating some necessary files and directories for running a specific design which in our case is 'picorv32a'
+# We use the -overwrite tag to change the already existing folder in the runs this is done to avoid large number of folders being generated.
 prep -design picorv32a -tag 29-10_19-51 -overwrite
-set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
+
+# Adiitional commands to include newly added lef to openlane flow
+set lefs [glob $::env(DESIGN_DIR)/src/sky130_vsdinv.lef]
 add_lefs -src $lefs
-set ::env(SYNTH_STRATEGY) "DELAY 3"
-set ::env(SYNTH_SIZING) 1
+
+# Now that the design is prepped and ready, we can run synthesis using following command
 run_synthesis
 ```
 
-**Result:** Area increased, but Worst Negative Slack (WNS) improved to 0.
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8624bebb-5fa3-4691-a1b7-a5d1839b2367" />
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/cf4396f3-4d8b-44e7-8f52-a338fa2445e0" />
+
+There is a large 
 ### 6\. Run Floorplan & Placement with Custom Cell
 
 **Commands (in OpenLANE interactive shell):**
@@ -561,24 +620,159 @@ run_placement
 
 **Result:** The custom inverter was successfully placed and abutted.
 
-### 7\. Post-Synthesis STA & Manual Timing ECO
+### 7\. Remove/reduce the newly introduced timing violations.
 
-Used a previous synthesis run with violations to practice manual ECO.
+- Changing the `SYNTH_STRATEGY` using: `set ::env(SYNTH_STRATEGY) "DELAY 3"`
+
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/67737989-4740-4369-9a41-1e7c2e463582" />
+
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ebce52ff-cb5b-4b88-9e0a-b1e1bb7ad28f" />
+
+- Changing the `SYNTH_SIZING` using: `set ::env(SYNTH_SIZING) 1`
+
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/eae53c80-68f8-43d2-9ffd-ab4b6ad262c2" />
+
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/06b007dc-390b-4121-b844-cdb0fe4dbe2d" />
+
+  After running the `run_synthesis` again we can observe that the WNS becomes 0 but the area is increased. This is due to the change in the `SYNTH_STRATEGY` which focuses on decreasing the delay while increasing the area.
+
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/aa733290-4b5a-43ba-bad8-82535314aa00" />
+
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/f4567348-3695-4ddd-a131-ea150ed75893" />
+
+
+### 8\. Run floorplan and placement and verify the cell is accepted in PnR flow.
+
+Now that our custom inverter is properly accepted in synthesis we can now run floorplan using following command
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2f7b22be-ae10-43fd-b3a8-e31b6d91e2ed" />
+
+```tcl
+run_floorplan
+```
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b7c025b2-38ed-4c78-a9dd-c451f24d35dd" />
+
+Since we are facing an error while using run_floorplan command, we can use the following set of commands available based on information from Desktop/work/tools/openlane_working_dir/openlane/scripts/tcl_commands/floorplan.tcl and also based on Floorplan Commands section in Desktop/work/tools/openlane_working_dir/openlane/docs/source/OpenLANE_commands.md
+
+```tcl
+# Follwing commands are alltogather sourced in "run_floorplan" command
+init_floorplan
+place_io
+tap_decap_or
+```
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/973ecd5b-ccf3-4c03-ad28-03a51b54ca45" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c991f634-9495-43da-b53b-76cb272e05a8" />
+
+After the floorplan we run the Placement with the command:
+
+```tcl
+run_placement
+```
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/611ccc4b-96b4-4387-9f2d-98a963fef1ea" />
+
+In the MAGIC we can observe that the cell sky130_vsdinv is present after the placement. These are the commands used to open the MAGIC tool:
+
+```tcl
+# Change directory to path containing generated placement def
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/24-03_10-03/results/placement/
+
+# Command to load the placement def in magic tool
+magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.placement.def &
+```
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c2d17645-91ff-402b-9867-8ff026ba7114" />
+
+With the internal layout we can view the inverter by selecting the inverter and then entering this command:
+
+```tcl
+# Command to view internal connectivity layers
+expand
+```
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e2a39c76-e53c-418b-af3a-dc77be8a2d94" />
+
+### 8\. Post-Synthesis STA with OpenSTA tool.
+
+Since we were having 0 wns after improved timing run we are going to do timing analysis on initial run of synthesis which has lots of violations and no parameters were added to improve timing. First we need to run the synthesis without changing the `SYNTH_STRATEGY`. Then we need to create pre_sta.conf for STA analysis in openlane directory.
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/32d5ae5c-24a9-4f8d-9519-6801ec713448" />
+
+Newly created base.sdc for STA analysis in `openlane/designs/picorv32a/src` directory based on the file `openlane/scripts/base.sdc`
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/04b44e40-d22c-4114-a60c-38a81c679a72" />
+
 **Commands (in bash terminal):**
 
 ```bash
 sta pre_sta.conf
 ```
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c2334b0c-9e44-44ef-9a3b-2aad5ee0f690" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/bda7d0bc-c670-4673-8f68-223e1d1fb4c3" />
+
+OR gate of drive strength 2 is driving 4 fanouts. This might be the cause for the violation. We can replace the cell with a higher drive strength.
+
 **Commands (in STA shell):**
 
 ```tcl
+# Reports all the connections to a net
 report_net -connections _11672_
+
+# Checking command syntax
+help replace_cell
+
+# Replacing cell
 replace_cell _14510_ sky130_fd_sc_hd__or3_4
+
+# Generating custom timing report
 report_checks -fields {net cap slew input_pins} -digits 4
-write_verilog .../picorv32a.synthesis.v
-exit
 ```
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3ca257e4-daf9-4a65-a77b-c4ffe5abcde5" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/cae07002-2ee5-4a0d-ab9f-a258e013c399" />
+
+Improved the WNS from -23.90 to -23.50:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ea254bb8-f7f5-4689-a953-3e06002bc6a2" />
+
+Still the slack is not acceptable, so we can try replacing the cells with a higher delay/ larger slew/ higher fanout cells. Here I am replacing an OR gate of drive strength 2 is driving 4 fanouts:
+
+**Commands (in STA shell):**
+
+```tcl
+# Reports all the connections to a net
+report_net -connections _11675_
+
+# Replacing cell
+replace_cell _14514_ sky130_fd_sc_hd__or3_4
+
+# Generating custom timing report
+report_checks -fields {net cap slew input_pins} -digits 4
+```
+
+We can observe the WNS improved from -23.50 to -23.14:
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4c4e04b7-e0f1-4ce8-b9de-3c1f0bca5d21" />
+
+The OR gate of drive strength 2 driving OA gate has more delay which is replaced by a OR gate which has a higher fanout.
+
+```bash
+# Reports all the connections to a net
+report_net -connections _11668_
+
+# Replacing cell
+replace_cell _14506_ sky130_fd_sc_hd__or4_4
+
+# Generating custom timing report
+report_checks -fields {net cap slew input_pins} -digits 4
+```
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1b1f3026-1f41-41d0-8063-c8f8d07da97d" />
 
 **Result:** WNS improved from -23.9000 ns to -22.6173 ns.
 
